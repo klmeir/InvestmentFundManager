@@ -1,0 +1,23 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=dynamodb,cloudformation,sns,sqs
+      - DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_EMAIL_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:EmailTopic
+      - AWS_SMS_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:SmsTopic
+      - DEBUG=1
+    volumes:
+      - "./localstack/init:/etc/localstack/init/ready.d"
+      - "./cloudformation:/opt/cloudformation"
+      - "./tmp/env_vars:/tmp/env_vars"
+    command: bash -c "chmod +x /etc/localstack/init/ready.d/*.sh && localstack start"
+
+volumes:
+  localstack_data:
