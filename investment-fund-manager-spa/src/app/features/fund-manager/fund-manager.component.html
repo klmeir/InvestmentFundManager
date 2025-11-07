@@ -1,47 +1,95 @@
-<div class="fund-manager">
+<div class="container py-4 fund-manager">
 
   <!-- Selector de fondos + Subscribe -->
-  <div class="fund-selector">
-    <label for="fund-select">Select a fund:</label>
-    <select id="fund-select" [(ngModel)]="selectedFundId">
-      <option value="" disabled>Select a fund</option>
-      <option *ngFor="let fund of funds$ | async" [value]="fund.id">
-        {{ fund.name }} - {{ fund.minimumAmount | currency:'COP' }}
-      </option>
-    </select>
-    <button (click)="subscribe()">Subscribe</button>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Select a Fund</h5>
+
+      <div class="row g-2 align-items-end">
+        <!-- Selector de fondos -->
+        <div class="col-md-5">
+          <label for="fund-select" class="form-label">Available funds</label>
+          <select id="fund-select" class="form-select" [(ngModel)]="selectedFundId">
+            <option value="" disabled>Select a fund</option>
+            <option *ngFor="let fund of funds$ | async" [value]="fund.id">
+              {{ fund.name }} - {{ fund.minimumAmount | currency:'COP' }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Selector de tipo de notificación -->
+        <div class="col-md-3">
+          <label for="notification-select" class="form-label">Notification type</label>
+          <select id="notification-select" class="form-select" [(ngModel)]="notificationChannel">
+            <option value="" disabled>Select type</option>
+            <option value="Email">Email</option>
+            <option value="SMS">SMS</option>
+          </select>
+        </div>
+
+        <!-- Botón Subscribe -->
+        <div class="col-md-2">
+          <button
+            class="btn btn-primary w-100"
+            [disabled]="!selectedFundId || !notificationChannel"
+            (click)="subscribe()">
+            Subscribe
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="message" class="alert alert-info mt-3">{{ message }}</div>
+    </div>
   </div>
 
-  <p *ngIf="message">{{ message }}</p>
-
   <!-- Tabla de transacciones -->
-  <h3>Transactions</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Fund</th>
-        <th>Amount</th>
-        <th>Type</th>
-        <th>Date</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let tx of transactions$ | async">
-        <td>{{ tx.fund }}</td>
-        <td>{{ tx.amount | currency:'COP' }}</td>
-        <td>{{ tx.type }}</td>
-        <td>{{ tx.date | date:'short' }}</td>
-        <td>{{ tx.status }}</td>
-        <td>
-          <button *ngIf="tx.type === 'SUBSCRIPTION' && tx.status === 'COMPLETED'"
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Transactions</h5>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Fund</th>
+              <th>Amount</th>
+              <th>Type</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Notification</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tx of transactions$ | async">
+              <td>{{ tx.fund }}</td>
+              <td>{{ tx.amount | currency:'COP' }}</td>
+              <td>
+                <span [class]="tx.type === 'SUBSCRIPTION' ? 'badge bg-primary' : 'badge bg-secondary'">
+                  {{ tx.type }}
+                </span>
+              </td>
+              <td>{{ tx.date | date:'short' }}</td>
+              <td>
+                <span [class]="tx.status === 'COMPLETED' ? 'badge bg-success' : 'badge bg-warning text-dark'">
+                  {{ tx.status }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-info text-dark">{{ tx.notificationChannel || '-' }}</span>
+              </td>
+              <td>
+                <button
+                  *ngIf="tx.type === 'SUBSCRIPTION' && tx.status === 'COMPLETED'"
+                  class="btn btn-outline-danger btn-sm"
                   (click)="cancel(tx.fundId)">
-            Cancel
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+                  Cancel
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
 </div>

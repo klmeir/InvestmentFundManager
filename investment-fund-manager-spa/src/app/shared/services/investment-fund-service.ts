@@ -25,8 +25,8 @@ export class InvestmentFundApi {
    * Subscribe user to a fund
    * @param fundId Fund identifier
    */
-  subscribe(fundId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/subscribe`, { fundId });
+  subscribe(fundId: string, notificationChannel: 'EMAIL' | 'SMS' | string = ''): Observable<any> {
+    return this.http.post(`${this.apiUrl}/subscribe`, { fundId, notificationChannel });
   }
 
   /**

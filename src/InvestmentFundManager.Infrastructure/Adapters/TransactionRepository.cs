@@ -59,7 +59,7 @@ namespace InvestmentFundManager.Infrastructure.Adapters
             };
 
             var response = await _dynamoDb.ScanAsync(request);
-            return response.Items.Select(MapToEntity).ToList();
+            return response.Items.Select(MapToEntity).OrderByDescending(t => t.Date).ToList();
         }
 
         /// <summary>

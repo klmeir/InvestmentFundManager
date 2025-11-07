@@ -17,6 +17,7 @@ export class FundManagerComponent implements OnInit {
   funds$!: Observable<Fund[]>;                     // Todos los fondos
   transactions$!: Observable<FundTransaction[]>;  // Todas las transacciones
   selectedFundId: string = '';
+  notificationChannel: 'EMAIL' | 'SMS' | string = '';
   message: string = '';
   isLoading: boolean = false;
 
@@ -33,7 +34,12 @@ export class FundManagerComponent implements OnInit {
       return;
     }
 
-    this.fundApi.subscribe(this.selectedFundId).subscribe({
+    if (!this.selectedFundId) {
+      this.message = 'Please select a notification type to subscribe.';
+      return;
+    }
+
+    this.fundApi.subscribe(this.selectedFundId, this.notificationChannel).subscribe({
       next: () => {
         this.message = '✅ Subscription successful!';
         this.loadTransactions();
