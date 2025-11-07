@@ -40,6 +40,10 @@ Deberías ver algo similar:
 | InvestmentFund Frontend| http://localhost:4200         |
 | LocalStack (AWS Mock)  | http://localhost:4566         |
 
+![InvestmentFund API](https://raw.githubusercontent.com/klmeir/InvestmentFundManager/refs/heads/main/docs/swagger.png)
+![InvestmentFund Frontend](https://raw.githubusercontent.com/klmeir/InvestmentFundManager/refs/heads/main/docs/app.png)
+
+
 ---
 
 ## 🧱 Arquitectura general
