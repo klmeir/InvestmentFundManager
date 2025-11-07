@@ -1,7 +1,14 @@
 # 💸 Investment Fund Manager
 
 Plataforma de suscripción a fondos desarrollada con **.NET 8 (Backend)** y **Angular 20 (Frontend)**.  
-Todo el entorno puede levantarse fácilmente con **Docker Compose** para revisión.
+
+- **.NET 8** → para la implementación del dominio, aplicación y API REST.
+- **AWS (DynamoDB, SNS, CloudFormation)** → como infraestructura en la nube para persistencia y notificaciones.
+- **Docker + LocalStack** → permite simular servicios de AWS en entorno local y facilitar el despliegue.
+- **xUnit + Moq** → usados para pruebas unitarias del dominio y servicios principales.
+
+Estas tecnologías garantizan una solución **escalable, segura y fácil de mantener**, con infraestructura reproducible tanto en local como en la nube.
+
 
 ---
 
