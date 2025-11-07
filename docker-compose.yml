@@ -41,6 +41,17 @@ services:
       - DOTNET_USE_POLLING_FILE_WATCHER=1
     depends_on:
       - localstack
+  frontend:
+    build:
+      context: ./investment-fund-manager-spa
+      dockerfile: Dockerfile
+      args:
+        - API_URL=http://localhost:8000/api
+    container_name: investmentfund-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
 
 volumes:
   localstack_data:
