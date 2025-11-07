@@ -1,0 +1,47 @@
+<div class="fund-manager">
+
+  <!-- Selector de fondos + Subscribe -->
+  <div class="fund-selector">
+    <label for="fund-select">Select a fund:</label>
+    <select id="fund-select" [(ngModel)]="selectedFundId">
+      <option value="" disabled>Select a fund</option>
+      <option *ngFor="let fund of funds$ | async" [value]="fund.id">
+        {{ fund.name }} - {{ fund.minimumAmount | currency:'COP' }}
+      </option>
+    </select>
+    <button (click)="subscribe()">Subscribe</button>
+  </div>
+
+  <p *ngIf="message">{{ message }}</p>
+
+  <!-- Tabla de transacciones -->
+  <h3>Transactions</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Fund</th>
+        <th>Amount</th>
+        <th>Type</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tx of transactions$ | async">
+        <td>{{ tx.fund }}</td>
+        <td>{{ tx.amount | currency:'COP' }}</td>
+        <td>{{ tx.type }}</td>
+        <td>{{ tx.date | date:'short' }}</td>
+        <td>{{ tx.status }}</td>
+        <td>
+          <button *ngIf="tx.type === 'SUBSCRIPTION' && tx.status === 'COMPLETED'"
+                  (click)="cancel(tx.fundId)">
+            Cancel
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
