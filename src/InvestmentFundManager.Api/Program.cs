@@ -6,14 +6,12 @@ using InvestmentFundManager.Api.Middleware;
 using InvestmentFundManager.Api.Validators;
 using InvestmentFundManager.Application;
 using InvestmentFundManager.Application.Funds.Commands;
-using InvestmentFundManager.Domain.Entities;
 using InvestmentFundManager.Domain.Ports;
 using InvestmentFundManager.Domain.Services;
 using InvestmentFundManager.Infrastructure.Adapters;
 using InvestmentFundManager.Infrastructure.Config;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using System;
 using System.Text.Json.Serialization;
 
 namespace InvestmentFundManager.Api
@@ -34,10 +32,7 @@ namespace InvestmentFundManager.Api
 
             // -----------------------------
             // AWS Settings
-            // -----------------------------
-            //builder.Services.Configure<AwsSettings>(builder.Configuration.GetSection("AwsSettings"));
-            //var awsSettings = builder.Configuration.GetSection("AwsSettings").Get<AwsSettings>();
-            // ? Bind AwsSettings from configuration
+            // -----------------------------          
             builder.Services.Configure<AwsSettings>(builder.Configuration.GetSection("AwsSettings"));
             builder.Services.AddSingleton(sp =>
                 sp.GetRequiredService<IOptions<AwsSettings>>().Value);
@@ -94,6 +89,15 @@ namespace InvestmentFundManager.Api
                     opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
+            // Add CORS policy
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
 
             builder.Services.AddScoped<IValidator<SubscribeFundCommand>, SubscribeFundCommandValidator>();
             builder.Services.AddScoped<IValidator<CancelFundCommand>, CancelFundCommandValidator>();
@@ -125,11 +129,14 @@ namespace InvestmentFundManager.Api
                 app.UseHttpsRedirection();
             }
 
+            // Use CORS
+            app.UseCors("CorsPolicy");
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Investment Fund Manager API v1");
-                c.RoutePrefix = string.Empty;
+                //c.RoutePrefix = string.Empty;
             });
 
             app.MapControllers();

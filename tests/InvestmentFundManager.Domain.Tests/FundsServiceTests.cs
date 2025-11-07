@@ -48,6 +48,8 @@ namespace InvestmentFundManager.Domain.Tests
                 Recipient = "user@email.com",
                 NotificationChannel = NotificationChannel.EMAIL
             };
+            _transactionRepoMock.Setup(t => t.GetActiveSubscriptionAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((FundTransaction)null);
 
             // Act
             var result = await _service.SubscribeAsync(transaction);
@@ -93,6 +95,8 @@ namespace InvestmentFundManager.Domain.Tests
                 Recipient = "+573001234567",
                 NotificationChannel = NotificationChannel.SMS
             };
+            _transactionRepoMock.Setup(t => t.GetActiveSubscriptionAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync(transaction);
 
             // Act
             var result = await _service.CancelAsync(transaction);
@@ -116,6 +120,8 @@ namespace InvestmentFundManager.Domain.Tests
                 Recipient = "user@email.com",
                 NotificationChannel = NotificationChannel.EMAIL
             };
+            _transactionRepoMock.Setup(t => t.GetActiveSubscriptionAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((FundTransaction)null);
 
             // Act
             await _service.SubscribeAsync(transaction);
@@ -140,6 +146,8 @@ namespace InvestmentFundManager.Domain.Tests
                 Recipient = "+573001234567",
                 NotificationChannel = NotificationChannel.SMS
             };
+            _transactionRepoMock.Setup(t => t.GetActiveSubscriptionAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync((FundTransaction)null);
 
             // Act
             await _service.SubscribeAsync(transaction);

@@ -9,15 +9,38 @@ services:
       - DEFAULT_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
-      - AWS_DEFAULT_REGION=us-east-1
-      - AWS_EMAIL_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:EmailTopic
-      - AWS_SMS_TOPIC_ARN=arn:aws:sns:us-east-1:000000000000:SmsTopic
+      - AWS_DEFAULT_REGION=us-east-1      
       - DEBUG=1
     volumes:
       - "./localstack/init:/etc/localstack/init/ready.d"
       - "./cloudformation:/opt/cloudformation"
       - "./tmp/env_vars:/tmp/env_vars"
     command: bash -c "chmod +x /etc/localstack/init/ready.d/*.sh && localstack start"
+  api:
+    build:
+      context: ./src
+      dockerfile: InvestmentFundManager.Api/Dockerfile
+    container_name: investmentfund-api
+    ports:
+      - "8000:8080"
+    environment:
+      # AWS / LocalStack
+      - AwsSettings__ServiceURL=http://localstack:4566
+      - AwsSettings__Region=us-east-1
+      - AwsSettings__AccessKey=test
+      - AwsSettings__SecretKey=test
+      # DynamoDB tables
+      - AwsSettings__DynamoFundsTransactionsTableName=FundsTransactions
+      - AwsSettings__DynamoUserTableName=Users
+      - AwsSettings__DynamoFundTableName=Funds
+      # SNS ARNs (LocalStack)
+      - AwsSettings__SnsEmailTopicArn=arn:aws:sns:us-east-1:000000000000:EmailTopic
+      - AwsSettings__SnsSmsTopicArn=arn:aws:sns:us-east-1:000000000000:SmsTopic
+      # .NET container settings
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+    depends_on:
+      - localstack
 
 volumes:
   localstack_data:

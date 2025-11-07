@@ -21,6 +21,11 @@ namespace InvestmentFundManager.Domain.Entities
         /// <summary>
         /// Fund name involved in the transaction.
         /// </summary>
+        public string FundId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Fund name involved in the transaction.
+        /// </summary>
         public string Fund { get; set; } = string.Empty;
 
         /// <summary>
@@ -67,6 +72,10 @@ namespace InvestmentFundManager.Domain.Entities
         /// Optional: Available balance after the transaction.
         /// </summary>
         public decimal? BalanceAfterTransaction { get; set; }
+
+        public FundTransaction()
+        {
+        }
 
         /// <summary>
         /// Creates a readable summary of the transaction.

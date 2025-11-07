@@ -19,7 +19,7 @@ namespace InvestmentFundManager.Application.Funds.Commands.Handlers
             var transaction = new FundTransaction
             {
                 Id = Guid.NewGuid().ToString(),
-                Fund = command.FundId
+                FundId = command.FundId
             };
 
             // Delegate to domain service

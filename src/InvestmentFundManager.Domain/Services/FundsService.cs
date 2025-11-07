@@ -41,10 +41,15 @@ namespace InvestmentFundManager.Domain.Services
                 throw new CoreBusinessException($"Default User not found.");
 
 
-            var fund = await _fundRepository.GetFundByIdAsync(model.Fund);
+            var fund = await _fundRepository.GetFundByIdAsync(model.FundId);
 
             if (fund == null)
-                throw new CoreBusinessException($"Fund '{model.Fund}' not found.");
+                throw new CoreBusinessException($"Fund '{model.FundId}' not found.");
+
+            var subscriptionTransaction = await _transactionRepository.GetActiveSubscriptionAsync(user.Id, fund.Id);
+
+            if (subscriptionTransaction != null)
+                throw new CoreBusinessException($"You already have an active subscription for this fund. '{fund.Name}'.");
 
             if (user.Balance < fund.MinimumAmount)
                 throw new CoreBusinessException($"No tiene saldo disponible para vincularse al fondo {fund.Name}");
@@ -52,6 +57,7 @@ namespace InvestmentFundManager.Domain.Services
             user.Balance -= fund.MinimumAmount;
             user.LastUpdated = DateTime.UtcNow;
 
+            model.Fund = fund.Name;
             model.Amount = fund.MinimumAmount;
             model.Type = TransactionType.SUBSCRIPTION;
             model.Status = TransactionStatus.COMPLETED;
@@ -81,31 +87,34 @@ namespace InvestmentFundManager.Domain.Services
             if (user == null)
                 throw new CoreBusinessException($"Default User not found.");
 
-            var fund = await _fundRepository.GetFundByIdAsync(model.Fund);
+            var fund = await _fundRepository.GetFundByIdAsync(model.FundId);
 
             if (fund == null)
-                throw new CoreBusinessException($"Fund '{model.Fund}' not found.");
+                throw new CoreBusinessException($"Fund '{model.FundId}' not found.");
 
-            var subscriptionTransaction = await GetActiveSubscriptionAsync(user.Id, fund.Id);
+            var activeSubscriptionTransaction = await _transactionRepository.GetActiveSubscriptionAsync(user.Id, fund.Id);
 
-            if (subscriptionTransaction == null)
+            if (activeSubscriptionTransaction == null)
                 throw new CoreBusinessException($"No active subscription found to cancel for fund '{fund.Name}'.");
 
             user.Balance += fund.MinimumAmount;
             user.LastUpdated = DateTime.UtcNow;
 
+            model.Fund = fund.Name;
             model.Amount = fund.MinimumAmount;
             model.Type = TransactionType.CANCELLATION;
-            model.Status = TransactionStatus.CANCELED;
+            model.Status = TransactionStatus.COMPLETED;
             model.Date = DateTime.UtcNow;
             model.BalanceAfterTransaction = user.Balance;
 
-            model.NotificationChannel = subscriptionTransaction.NotificationChannel;
-            model.Recipient = subscriptionTransaction.Recipient;
-            model.User = user.Id;
+            model.NotificationChannel = activeSubscriptionTransaction.NotificationChannel;
+            model.Recipient = activeSubscriptionTransaction.Recipient;
+            model.User = user.Id;            
 
             await _transactionRepository.RegisterTransactionAsync(model);
             await _userRepository.UpdateUserAsync(user);
+            
+            await _transactionRepository.UpdateTransactionStatusAsync(activeSubscriptionTransaction.Id, TransactionStatus.CANCELED);
 
             await _notificationService.NotifyAsync(
                 model,
@@ -138,41 +147,6 @@ namespace InvestmentFundManager.Domain.Services
         {
             return await _userRepository.GetUserAsync();
         }
-
-        /// <summary>
-        /// Retrieves the latest active subscription of a user for a specific fund.
-        /// Returns null if there is no active subscription.
-        /// </summary>
-        private async Task<FundTransaction?> GetActiveSubscriptionAsync(string userId, string fundId)
-        {
-            // Get all transactions of the user
-            var allTransactions = await _transactionRepository.ListTransactionsAsync();
-
-            // Filter only completed subscriptions for the given fund
-            var subscriptions = allTransactions
-                .Where(t => t.User == userId && t.Fund == fundId && t.Type == TransactionType.SUBSCRIPTION && t.Status == TransactionStatus.COMPLETED)
-                .OrderByDescending(t => t.Date); // most recent first
-
-            foreach (var sub in subscriptions)
-            {
-                // Check if there is a cancellation after this subscription
-                bool hasCancellationAfter = allTransactions.Any(c =>
-                    c.User == userId &&
-                    c.Fund == fundId &&
-                    c.Type == TransactionType.CANCELLATION &&
-                    c.Status == TransactionStatus.CANCELED &&
-                    c.Date > sub.Date
-                );
-
-                // If no cancellation after, this subscription is still active
-                if (!hasCancellationAfter)
-                    return sub;
-            }
-
-            // No active subscription found
-            return null;
-        }
-
 
     }
 }

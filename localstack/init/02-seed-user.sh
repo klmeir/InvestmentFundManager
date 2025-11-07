@@ -1,6 +1,9 @@
 #!/bin/bash
 echo "📦 Seeding initial Users data into DynamoDB..."
 
+# Esperar unos segundos por si CloudFormation aún está creando las tablas
+sleep 5
+
 # Verificar que la tabla exista antes de insertar
 TABLE_EXISTS=$(awslocal dynamodb list-tables | grep "Users")
 
